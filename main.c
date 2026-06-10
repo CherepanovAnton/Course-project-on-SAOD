@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define COUNT_PEOPLE 4000
+#define L 255
 
 struct person {
     char fullName[32];
@@ -15,6 +16,25 @@ typedef struct tLE {
     struct person data;
     struct tLE *next;
 } tLE;
+
+typedef struct {
+    tLE *head;
+    tLE *tail;
+} tQueue;
+
+tLE *DigitalSort(tLE *head) {
+    tQueue queue[L + 1];
+    for (int j = L; j >= 0; j--) {
+        for (int i = 0; i <= L; i++) {
+            queue[i].head = NULL;
+            queue[i].tail = queue[i].head;
+        }
+        tLE *p = head;
+        while (p != NULL) {
+
+        }
+    }
+}
 
 tLE *CreateList(FILE *f, short int *cnt) {
     tLE *head = NULL;
