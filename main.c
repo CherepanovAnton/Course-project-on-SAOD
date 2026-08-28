@@ -21,7 +21,7 @@ typedef struct tLE {
 
 typedef struct {
     tLE *head;
-    tLE **tail;
+    tLE *tail;
 } tQueue;
 
 void DigitalSort(tLE **head) {
@@ -29,16 +29,20 @@ void DigitalSort(tLE **head) {
     tQueue queue[M + 1];
     for (int j = 0; j < 6; j++) {
         for (int i = 0; i <= M; i++) {
-            queue[i].tail = &queue[i].head;
+            queue[i].tail = NULL;
             queue[i].head = NULL;
         }
         tLE *p = *head;
         while (p != NULL) {
             tLE *next_node = p->next;
             unsigned char d = p->data.dateSettlement[indexData[j]];
-            *queue[d].tail = p;
-            queue[d].tail = &p->next;
             p->next = NULL;
+            if (queue[d].head == NULL) {
+                queue[d].head = p;
+            } else {
+                queue[d].tail->next = p;
+            }
+            queue[d].tail = p;
             p = next_node;
         }
         tLE node;
@@ -47,9 +51,7 @@ void DigitalSort(tLE **head) {
         for (int i = 0; i <= M; i++) {
             if (queue[i].head != NULL) {
                 p->next = queue[i].head;
-                while (p->next != NULL) {
-                    p = p->next;
-                }
+                p = queue[i].tail;
             }
         }
         p->next = NULL;
@@ -60,7 +62,7 @@ void DigitalSort(tLE **head) {
 tLE *CreateList(FILE *f, short int *cnt) {
     tQueue Q;
     Q.head = NULL;
-    Q.tail = &Q.head;
+    Q.tail = NULL;
     struct person buf;
     while (fread(&buf, sizeof(struct person), 1, f) == 1) {
         tLE *newElement = malloc(sizeof(tLE));
@@ -70,8 +72,12 @@ tLE *CreateList(FILE *f, short int *cnt) {
         }
         newElement->data = buf;
         newElement->next = NULL;
-        *Q.tail = newElement;
-        Q.tail = &newElement->next;
+        if (Q.head == NULL) {
+            Q.head = newElement;
+        } else {
+            Q.tail->next = newElement;
+        }
+        Q.tail = newElement;
         (*cnt)++;
     }
     return Q.head;
