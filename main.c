@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define COUNT_PEOPLE 4000
-#define L 255
+#define M 255
+#define L 10
 
 struct person {
     char fullName[32];
@@ -19,26 +21,46 @@ typedef struct tLE {
 
 typedef struct {
     tLE *head;
-    tLE *tail;
+    tLE **tail;
 } tQueue;
 
-tLE *DigitalSort(tLE *head) {
-    tQueue queue[L + 1];
-    for (int j = L; j >= 0; j--) {
-        for (int i = 0; i <= L; i++) {
+void DigitalSort(tLE **head) {
+    short int indexData[6] = {1, 0, 4, 3, 7, 6};
+    tQueue queue[M + 1];
+    for (int j = 0; j < 6; j++) {
+        for (int i = 0; i <= M; i++) {
+            queue[i].tail = &queue[i].head;
             queue[i].head = NULL;
-            queue[i].tail = queue[i].head;
         }
-        tLE *p = head;
+        tLE *p = *head;
         while (p != NULL) {
-
+            tLE *next_node = p->next;
+            unsigned char d = p->data.dateSettlement[indexData[j]];
+            *queue[d].tail = p;
+            queue[d].tail = &p->next;
+            p->next = NULL;
+            p = next_node;
         }
+        tLE node;
+        node.next = NULL;
+        p = &node;
+        for (int i = 0; i <= M; i++) {
+            if (queue[i].head != NULL) {
+                p->next = queue[i].head;
+                while (p->next != NULL) {
+                    p = p->next;
+                }
+            }
+        }
+        p->next = NULL;
+        *head = node.next;
     }
 }
 
 tLE *CreateList(FILE *f, short int *cnt) {
-    tLE *head = NULL;
-    tLE *tail = head;
+    tQueue Q;
+    Q.head = NULL;
+    Q.tail = &Q.head;
     struct person buf;
     while (fread(&buf, sizeof(struct person), 1, f) == 1) {
         tLE *newElement = malloc(sizeof(tLE));
@@ -48,17 +70,11 @@ tLE *CreateList(FILE *f, short int *cnt) {
         }
         newElement->data = buf;
         newElement->next = NULL;
-
-        if (head == NULL) {
-            head = newElement;
-            tail = newElement;
-        } else {
-            tail->next = newElement;
-            tail = newElement;
-        }
+        *Q.tail = newElement;
+        Q.tail = &newElement->next;
         (*cnt)++;
     }
-    return head;
+    return Q.head;
 }
 
 void freeList(tLE *head) {
@@ -100,6 +116,14 @@ int main() {
             PrintPerson(cur);
             cur = cur->next;
         }
+    }
+
+    DigitalSort(&head);
+    tLE *cur = head;
+    for (int i = 0; i < 30; i++) {
+        printf("Human %d\n", i + 1);
+        PrintPerson(cur);
+        cur = cur->next;
     }
 
     freeList(head);
