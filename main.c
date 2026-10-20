@@ -148,6 +148,56 @@ void ControlPrintList(tLE *head) {
     }
 }
 
+int getYear(char *date) {
+    return atoi(&date[6]);
+}
+
+void binarySearch(tLE *head) {
+
+    tLE *p[COUNT_PEOPLE];
+
+    tLE *cur = head;
+    for (int i = 0; i < COUNT_PEOPLE; i++) {
+        p[i] = cur;
+        cur = cur->next;
+    }
+
+    int x;
+    printf("\nВведите год для двоичного поиска: ");
+    scanf("%d", &x);
+
+    int l = 0;
+    int r = COUNT_PEOPLE - 1;
+
+    while (l < r) {
+        int mid = (l + r) / 2;
+        int midYear = getYear(p[mid]->data.dateSettlement);
+         if (midYear < x) {
+            l = mid + 1;
+        } else {
+            r = mid;
+        }
+    }
+
+    if (getYear(p[r]->data.dateSettlement) == x) {
+
+        int index = r;
+
+        int cnt = 0;
+        printf("\n--- Результаты из сформированной очереди ---");
+        printf("\n%-6s %-32s\t%-18s\t%s\t%s\t\t%s\n", "№", "ФИО", "Улица", "Дом", "Кв.", "Дата");
+        printf("------------------------------------------------------------------------------------------------\n");
+        while (index < COUNT_PEOPLE && getYear(p[index]->data.dateSettlement) == x) {
+            PrintPerson(p[index]);
+            cnt++;
+            index++;
+        }
+        printf("Найдено %d\n", cnt);
+    }
+
+
+}
+
 int main() {
     system("chcp 866 > nul");
     FILE *f = fopen("testBase4.dat", "rb");
@@ -175,6 +225,24 @@ int main() {
     scanf(" %c", &print);
     if (print == 'y' || print == 'Y') {
         ControlPrintList(head);
+    }
+
+
+    char search;
+    printf("\nВыполнить двоичный поиск по году поселения (y / n)? ");
+    scanf(" %c", &search);
+    if (search == 'y' || search == 'Y') {
+        while (1) {
+            printf("\nПоиск = Q\nВыход = E\n");
+            printf("Выберите действие: ");
+            scanf(" %c", &search);
+            if (search == 'e' || search == 'E') {
+                break;
+            }
+            if (search == 'q' || search == 'Q') {
+                 binarySearch(head);
+            }
+        }
     }
 
     freeList(head);
